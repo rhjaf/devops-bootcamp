@@ -8,16 +8,19 @@ In this setup we will setup and configure a nexus repo as a container. The nexus
     -p 8083:8083 sonatype/nexus3:3.94.0-alpine
     ```
 2. Create 3 blob store in nexus
-    ![alt text](image.png)
-    to be able to pull anonymously, enable `docker bear token`
-    ![alt text](image-1.png)
+
+   ![alt text](image.png)
+   
+   to be able to pull anonymously, enable `docker bear token`
+
+   ![alt text](image-1.png)
     
-3. Create 3 repos
+4. Create 3 repos
     
     ![alt text](image-2.png)  
     NOTE: port 8081 --> Nexus WebUI, 8082 --> docker proxy,  8083 --> docker host
     ![alt text](image-3.png)
-4. Set up an `nginx` container to act as a reverse proxy and make our nexus repo accessible via a domain name
+5. Set up an `nginx` container to act as a reverse proxy and make our nexus repo accessible via a domain name
     ```bash
     docker run -d  --name nginx --restart always -v ./nginx.conf:/etc/nginx/conf.d/default.conf -p 80:80 nginx:stable-alpine3.24-perl
     ```
@@ -46,13 +49,13 @@ In this setup we will setup and configure a nexus repo as a container. The nexus
     }
     }
     ```
-5. on `client` machine, Execute the below command  to change its `apt` sources
+6. on `client` machine, Execute the below command  to change its `apt` sources
     ```bash
     sudo sed -i   -e 's|ir\.archive\.ubuntu\.com/ubuntu|nexus.local:8081/repository/apt||g' \\
      -e  's|security\.ubuntu\.com/ubuntu|nexus.local:8081/repository/apt||g' \\
      /etc/apt/sources.list
     ```
-6. Add the following line to `/etc/docker/daemon.json` to be able to connect to nexus repo without HTTPs
+7. Add the following line to `/etc/docker/daemon.json` to be able to connect to nexus repo without HTTPs
     ```json
     "insecure-registeries"["nexus.local:8082","nexus.local:8083"]
     ```
@@ -60,7 +63,7 @@ In this setup we will setup and configure a nexus repo as a container. The nexus
     ```bash
     docker login nexus.local:8082 -u admin
     ```
-7. Now we can pull/push to nexus hosted docker repo, pull from docker proxy, and pull from apt proxy
+8. Now we can pull/push to nexus hosted docker repo, pull from docker proxy, and pull from apt proxy
     ```bash
     docker pull nexus.local:8082/ubuntu:latest
     ```
