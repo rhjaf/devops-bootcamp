@@ -1,0 +1,53 @@
+---
+
+- name: Enable the rewrite module on Debian
+  ansible.builtin.command: a2enmod rewrite
+  args:
+    creates: /etc/apache2/mods-enabled/rewrite.load
+  notify: restart apache
+  when: ansible_os_family == "Debian"
+
+- name: Disable the default site on Debian
+  ansible.builtin.file:
+    path: /etc/apache2/sites-enabled/000-default.conf
+    state: absent
+  notify: restart apache
+  when: ansible_os_family == "Debian"
+
+- name: Deploy the WordPress Apache configuration
+  ansible.builtin.template:
+    src: wordpress.conf.j2
+    dest: "{{ wordpress_apache_config_path }}"
+    mode: "0644"
+  notify: restart apache
+
+- name: Enable the WordPress site on Debian
+  ansible.builtin.command: a2ensite wordpress.conf
+  args:
+    creates: /etc/apache2/sites-enabled/wordpress.conf
+  notify: restart apache
+  when: ansible_os_family == "Debian"
+
+- name: Start Apache on Debian
+  ansible.builtin.service:
+    name: "{{ wordpress_apache_service }}"
+    state: started
+  when: ansible_os_family == "Debian"
+
+- name: Start Apache on RedHat
+  ansible.builtin.shell: |
+    if pgrep -x httpd >/dev/null; then
+      echo already-running
+      exit 0
+    fi
+    nohup {{ wordpress_apache_binary }} -DFOREGROUND > /tmp/httpd.log 2>&1 &
+    echo started
+  register: wordpress_httpd_start
+  changed_when: "'started' in wordpress_httpd_start.stdout"
+  when: ansible_os_family == "RedHat"
+
+- name: Wait for Apache to respond
+  ansible.builtin.wait_for:
+    port: "{{ wordpress_apache_listen_port }}"
+    host: "127.0.0.1"
+    timeout: 60

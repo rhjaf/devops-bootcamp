@@ -1,0 +1,35 @@
+---
+- name: Update apt cache on Debian
+  ansible.builtin.apt:
+    update_cache: true
+  when: ansible_os_family == "Debian"
+
+- name: Update dnf cache on RedHat
+  ansible.builtin.dnf:
+    update_cache: true
+  when: ansible_os_family == "RedHat"
+
+- name: Install WordPress packages on Debian
+  ansible.builtin.apt:
+    name: "{{ wordpress_packages }}"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Install WordPress packages on RedHat
+  ansible.builtin.dnf:
+    name: "{{ wordpress_packages }}"
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Create WordPress directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ wordpress_apache_user }}"
+    group: "{{ wordpress_apache_group }}"
+    mode: "0755"
+  loop:
+    - "{{ wordpress_install_parent }}"
+    - "{{ wordpress_install_dir }}"
+
+

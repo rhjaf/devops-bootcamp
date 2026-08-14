@@ -1,0 +1,54 @@
+---
+
+- name: Initialize MariaDB on RedHat if necessary
+  ansible.builtin.command: mariadb-install-db --user=mysql --datadir={{ wordpress_mariadb_data_dir }}
+  args:
+    creates: "{{ mariadb_data_dir }}/mysql"
+  when: ansible_os_family == "RedHat"
+
+- name: Start MariaDB in the background
+  ansible.builtin.shell: |
+    if pgrep -x mariadbd >/dev/null || pgrep -x mysqld >/dev/null; then
+      echo already-running
+      exit 0
+    fi
+    nohup mysqld_safe --datadir={{ mariadb_data_dir }} > /tmp/mariadb.log 2>&1 &
+    echo started
+  register: lamp_mariadb_start
+  changed_when: "'started' in lamp_mariadb_start.stdout"
+
+- name: Check MariaDB status on Debian
+  ansible.builtin.command:
+    cmd: systemctl is-active mariadb
+  register: mariadb_status
+  when: ansible_os_family == "Debian"
+  changed_when: false
+
+- name: Check MariaDB status on RedHat
+  ansible.builtin.command:
+    cmd: pgrep -x mariadbd >/dev/null || pgrep -x mysqld >/dev/null
+  register: mariadb_status
+  when: ansible_os_family == "RedHat"
+  changed_when: false
+
+- name: Wait for MariaDB to respond
+  ansible.builtin.wait_for:
+    port: "{{ lamp_db_port }}"
+    host: "127.0.0.1"
+    timeout: 60
+
+- name: Create application database
+  community.mysql.mysql_db:
+    name: "{{ lamp_db_name }}"
+    state: present
+    login_unix_socket: /run/mysqld/mysqld.sock
+
+- name: Create application database user
+  community.mysql.mysql_user:
+    name: "{{ lamp_db_user }}"
+    host: "{{ lamp_db_host }}"
+    password: "{{ lamp_db_password }}"
+    priv: "{{ lamp_db_name }}.*:ALL"
+    state: present
+    login_unix_socket: /run/mysqld/mysqld.sock
+

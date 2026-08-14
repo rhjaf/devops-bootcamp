@@ -1,0 +1,37 @@
+---
+
+- name: Initialize MariaDB on RedHat if necessary
+  ansible.builtin.command: mariadb-install-db --user=mysql --datadir={{ wordpress_mariadb_data_dir }}
+  args:
+    creates: "{{ wordpress_mariadb_data_dir }}/mysql"
+  when: ansible_os_family == "RedHat"
+
+- name: Start MariaDB in the background
+  ansible.builtin.shell: |
+    if pgrep -x mariadbd >/dev/null || pgrep -x mysqld >/dev/null; then
+      echo already-running
+      exit 0
+    fi
+    nohup mysqld_safe --datadir={{ wordpress_mariadb_data_dir }} > /tmp/mariadb.log 2>&1 &
+    echo started
+  register: wordpress_mariadb_start
+  changed_when: "'started' in wordpress_mariadb_start.stdout"
+
+- name: Wait for MariaDB to respond
+  ansible.builtin.wait_for:
+    port: "{{ wordpress_db_port }}"
+    host: "127.0.0.1"
+    timeout: 60
+
+- name: Create the WordPress database
+  ansible.builtin.shell: |
+    mysql -Nse "CREATE DATABASE IF NOT EXISTS \`{{ wordpress_db_name }}\`;"
+  changed_when: false
+
+- name: Create the WordPress account and grant it privileges
+  ansible.builtin.shell: |
+    mysql -Nse "CREATE USER IF NOT EXISTS '{{ wordpress_db_user }}'@'{{ wordpress_db_user_host }}' IDENTIFIED BY '{{ wordpress_db_password }}';"
+    mysql -Nse "GRANT ALL PRIVILEGES ON \`{{ wordpress_db_name }}\`.* TO '{{ wordpress_db_user }}'@'{{ wordpress_db_user_host }}';"
+    mysql -Nse "FLUSH PRIVILEGES;"
+  no_log: false
+  changed_when: false

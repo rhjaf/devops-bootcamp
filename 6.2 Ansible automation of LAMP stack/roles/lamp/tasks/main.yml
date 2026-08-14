@@ -1,0 +1,18 @@
+---
+- name: Verify that the system is supported
+  ansible.builtin.fail:
+    msg: "This ansible role only supports Debian/Ubuntu and RedHat/Rocky."
+  when: ansible_os_family not in ["Debian", "RedHat"]
+
+- name: Install prerequisites
+  ansible.builtin.include_tasks: install.yml
+
+- name: Configure MariaDB
+  ansible.builtin.include_tasks: mariadb.yml
+
+- name: Configure Apache
+  ansible.builtin.include_tasks: apache.yml
+
+- name: Setup simple website
+  ansible.builtin.include_tasks: website.yml
+

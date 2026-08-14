@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  author: ruhollah jahanafrooz
+  role_name: lamp
+  description: deploys a LAMP stack on Debian/RedHat Linux system
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - all
+    - name: EL
+      versions:
+        - "9"
+  galaxy_tags:
+    - php
+    - mariadb
+    - apache
+    - lamp
+    - debian
+    - redhat
+dependencies: []
+

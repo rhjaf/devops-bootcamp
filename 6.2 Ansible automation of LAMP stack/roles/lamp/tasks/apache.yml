@@ -1,0 +1,72 @@
+---
+
+- name: Remove default Apache index page
+  ansible.builtin.file:
+    path: /var/www/html/index.html
+    state: absent
+
+- name: Enable the rewrite module on Debian
+  ansible.builtin.command: a2enmod rewrite
+  args:
+    creates: /etc/apache2/mods-enabled/rewrite.load
+  notify: restart apache
+  when: ansible_os_family == "Debian"
+
+- name: Disable the default site on Debian
+  ansible.builtin.file:
+    path: /etc/apache2/sites-enabled/000-default.conf
+    state: absent
+  notify: restart apache
+  when: ansible_os_family == "Debian"
+
+- name: Deploy the Apache configuration
+  ansible.builtin.template:
+    src: apache.conf.j2
+    dest: "{{ apache_config_path }}"
+    mode: "0644"
+  notify: restart apache
+
+- name: Enable the lamp site on Debian
+  ansible.builtin.command: a2ensite apache.conf
+  args:
+    creates: /etc/apache2/sites-enabled/apache.conf
+  notify: restart apache
+  when: ansible_os_family == "Debian"
+
+- name: Start Apache on Debian
+  ansible.builtin.service:
+    name: "{{ apache_service }}"
+    state: started
+  when: ansible_os_family == "Debian"
+
+- name: Start Apache on RedHat
+  ansible.builtin.shell: |
+    if pgrep -x httpd >/dev/null; then
+      echo already-running
+      exit 0
+    fi
+    nohup {{ apache_binary }} -DFOREGROUND > /tmp/httpd.log 2>&1 &
+    echo started
+  register: lamp_httpd_start
+  changed_when: "'started' in lamp_httpd_start.stdout"
+  when: ansible_os_family == "RedHat"
+
+- name: Check Apache status on Debian
+  ansible.builtin.command:
+    cmd: systemctl is-active apache2
+  register: apache_status
+  changed_when: false
+  when: ansible_os_family == "Debian"
+
+- name: Check Apache status on RedHat
+  ansible.builtin.shell: 
+    cmd: pgrep -x httpd >/dev/null
+  register: apache_status
+  changed_when: false
+  when: ansible_os_family == "RedHat"
+
+- name: Wait for Apache to respond
+  ansible.builtin.wait_for:
+    port: "{{ lamp_apache_listen_port }}"
+    host: "127.0.0.1"
+    timeout: 60

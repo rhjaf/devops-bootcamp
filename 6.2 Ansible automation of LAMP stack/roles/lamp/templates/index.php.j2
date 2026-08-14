@@ -1,0 +1,120 @@
+<?php
+#echo "hello world";
+phpinfo(); ## to ensure php is working correctly
+?>
+
+<?php
+
+require_once 'db.php';
+
+
+// Add person
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+
+    if ($name !== '' && $email !== '') {
+
+        $stmt = $pdo->prepare(
+            "INSERT INTO people (name, email)
+             VALUES (?, ?)"
+        );
+
+        $stmt->execute([$name, $email]);
+    }
+}
+
+
+// Get all people
+$stmt = $pdo->query(
+    "SELECT id, name, email
+     FROM people
+     ORDER BY id DESC"
+);
+
+$people = $stmt->fetchAll();
+
+?>
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title> {{ site_name }}</title>
+
+</head>
+
+<body>
+
+    <h1>Welcome</h1>
+
+
+
+    <h2>Add Person</h2>
+
+    <form method="POST">
+
+        <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            required
+        >
+
+        <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            required
+        >
+
+        <button type="submit">
+            Add
+        </button>
+
+    </form>
+
+
+    <h2>People</h2>
+
+    <table border="1" cellpadding="8">
+
+        <tr>
+
+            <th>ID</th>
+
+            <th>Name</th>
+
+            <th>Email</th>
+
+        </tr>
+
+
+        <?php foreach ($people as $person): ?>
+
+        <tr>
+
+            <td>
+                <?= htmlspecialchars($person['id']) ?>
+            </td>
+
+            <td>
+                <?= htmlspecialchars($person['name']) ?>
+            </td>
+
+            <td>
+                <?= htmlspecialchars($person['email']) ?>
+            </td>
+
+        </tr>
+
+        <?php endforeach; ?>
+
+    </table>
+
+</body>
+
+</html>

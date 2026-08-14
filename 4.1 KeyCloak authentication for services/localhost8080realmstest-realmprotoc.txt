@@ -1,0 +1,16 @@
+localhost:8080/realms/test-realm/protocol/openid-connect/token
+client-id: test_client
+client-secret: dVJLf1s3dTzwWMGh7EVQorKhIrx2zK9JIgKtTe9wg1tXUITsyVigDoFgG6KMDbJpHYDs9DSIFvxn0ZjUnfT5ej
+grant_type: password
+username: test_user
+password: 123
+scope: openid profile email
+
+
+
+
+localhost:8080/realms/test-realm/protocol/openid-connect/userinfo
+further reading: keycloak 
+
+
+

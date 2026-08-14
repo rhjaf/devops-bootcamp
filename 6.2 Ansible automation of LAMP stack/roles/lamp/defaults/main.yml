@@ -1,0 +1,14 @@
+---
+lamp_root: "/var/www/html"
+site_name: "devops bootcamp"
+
+
+lamp_db_name: "lamp"
+lamp_db_user: "lamp"
+lamp_db_host: "localhost"
+lamp_db_port: 3306
+
+lamp_server_name: "localhost"
+lamp_apache_listen_port: 80
+
+mariadb_data_dir: "/var/lib/mysql"

@@ -1,0 +1,8 @@
+---
+- name: for test
+  hosts: all
+  remote_user: test
+  become: yes
+  become_method: sudo
+  roles:
+    - roles/wam

@@ -1,0 +1,39 @@
+---
+
+- name: Fix the permissions of the LAMP site
+  ansible.builtin.file:
+    path: "{{ lamp_root }}"
+    state: directory
+    owner: "{{ apache_user }}"
+    group: "{{ apache_group }}"
+    recurse: true
+
+- name: Create application table
+  community.mysql.mysql_query:
+    login_db: "{{ lamp_db_name }}"
+    login_user: "{{ lamp_db_user }}"
+    login_password: "{{ lamp_db_password }}"
+    login_host: "{{ lamp_db_host }}"
+    query: |
+      CREATE TABLE IF NOT EXISTS people (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(150) NOT NULL
+      );
+
+- name: Deploy php database configuration
+  ansible.builtin.template:
+    src: db.php.j2
+    dest: "{{ lamp_root }}/db.php"
+    owner: "{{ apache_user }}"
+    group: "{{ apache_group }}"
+    mode: "0640"
+
+- name: Deploy home page
+  ansible.builtin.template:
+    src: index.php.j2
+    dest: "{{ lamp_root }}/index.php"
+    owner: "{{ apache_user }}"
+    group: "{{ apache_group }}"
+    mode: "0644"
+  notify: restart apache

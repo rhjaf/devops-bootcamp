@@ -1,0 +1,14 @@
+<VirtualHost *:{{ lamp_apache_listen_port }}>
+    ServerName {{ lamp_server_name }}
+    DocumentRoot {{ lamp_root }}
+
+    <Directory {{ lamp_root }}>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    DirectoryIndex index.php index.html
+    ErrorLog ${APACHE_LOG_DIR}/wordpress_error.log
+    CustomLog ${APACHE_LOG_DIR}/wordpress_access.log combined
+</VirtualHost>
+

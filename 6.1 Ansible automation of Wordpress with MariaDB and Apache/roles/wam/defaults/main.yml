@@ -1,0 +1,20 @@
+---
+wordpress_install_parent: "/var/www/html"
+wordpress_install_dir: "{{ wordpress_install_parent }}/wordpress"
+wordpress_download_url: "https://wordpress.org/latest.tar.gz"
+wordpress_site_name: wordpress
+wordpress_archive_path: "~/wordpress.tar.gz"
+
+
+wordpress_db_root_password: "123"
+wordpress_db_name: "wordpress"
+wordpress_db_user: "wordpress"
+wordpress_db_password: "wordpress"
+wordpress_db_host: "localhost"
+wordpress_db_user_host: "localhost"
+wordpress_db_port: 3306
+
+wordpress_server_name: "localhost"
+wordpress_apache_listen_port: 80
+
+wordpress_mariadb_data_dir: "/var/lib/mysql"

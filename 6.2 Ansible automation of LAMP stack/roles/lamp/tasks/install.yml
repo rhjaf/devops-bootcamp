@@ -1,0 +1,31 @@
+---
+- name: Update apt cache on Debian
+  ansible.builtin.apt:
+    update_cache: true
+  when: ansible_os_family == "Debian"
+
+- name: Update dnf cache on RedHat
+  ansible.builtin.dnf:
+    update_cache: true
+  when: ansible_os_family == "RedHat"
+
+- name: Install LAMP packages on Debian
+  ansible.builtin.apt:
+    name: "{{ lamp_packages }}"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Install LAMP packages on RedHat
+  ansible.builtin.dnf:
+    name: "{{ lamp_packages }}"
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Create LAMP directories
+  ansible.builtin.file:
+    path: "{{ lamp_root }}"
+    state: directory
+    owner: "{{ apache_user }}"
+    group: "{{ apache_group }}"
+    mode: "0755"
+

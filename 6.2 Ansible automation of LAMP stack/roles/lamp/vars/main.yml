@@ -1,0 +1,42 @@
+---
+lamp_package_map:
+  Debian:
+    - apache2
+    - libapache2-mod-php
+    - mariadb-server
+    - php
+    - php-mysql
+    - python3-pymysql # for creating tables
+  RedHat:
+    - httpd
+    - mariadb-server
+    - php
+    - php-mysqlnd
+    - python3-PyMySQL # for creating tables
+lamp_apache_service_map:
+  Debian: apache2
+  RedHat: httpd
+
+lamp_apache_user_map:
+  Debian: www-data
+  RedHat: apache
+
+lamp_apache_group_map:
+  Debian: www-data
+  RedHat: apache
+
+lamp_apache_binary_map:
+  Debian: /usr/sbin/apache2ctl
+  RedHat: /usr/sbin/httpd
+
+lamp_apache_config_path_map:
+  Debian: /etc/apache2/sites-available/apache.conf
+  RedHat: /etc/httpd/conf.d/apache.conf
+
+lamp_packages: "{{ lamp_package_map[ansible_os_family] }}"
+apache_service: "{{ lamp_apache_service_map[ansible_os_family] }}"
+apache_user: "{{ lamp_apache_user_map[ansible_os_family] }}"
+apache_group: "{{ lamp_apache_group_map[ansible_os_family] }}"
+apache_binary: "{{ lamp_apache_binary_map[ansible_os_family] }}"
+apache_config_path: "{{ lamp_apache_config_path_map[ansible_os_family] }}"
+

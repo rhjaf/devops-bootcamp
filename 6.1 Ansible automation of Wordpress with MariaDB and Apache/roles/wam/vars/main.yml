@@ -1,0 +1,45 @@
+---
+wordpress_package_map:
+  Debian:
+    - apache2
+    - libapache2-mod-php
+    - mariadb-server
+    - php
+    - php-mysql
+    - tar
+    - wget
+  RedHat:
+    - httpd
+    - mariadb-server
+    - php
+    - php-mysqlnd
+    - tar
+    - wget
+
+wordpress_apache_service_map:
+  Debian: apache2
+  RedHat: httpd
+
+wordpress_apache_user_map:
+  Debian: www-data
+  RedHat: apache
+
+wordpress_apache_group_map:
+  Debian: www-data
+  RedHat: apache
+
+wordpress_apache_binary_map:
+  Debian: /usr/sbin/apache2ctl
+  RedHat: /usr/sbin/httpd
+
+wordpress_apache_config_path_map:
+  Debian: /etc/apache2/sites-available/wordpress.conf
+  RedHat: /etc/httpd/conf.d/wordpress.conf
+
+wordpress_packages: "{{ wordpress_package_map[ansible_os_family] }}"
+wordpress_apache_service: "{{ wordpress_apache_service_map[ansible_os_family] }}"
+wordpress_apache_user: "{{ wordpress_apache_user_map[ansible_os_family] }}"
+wordpress_apache_group: "{{ wordpress_apache_group_map[ansible_os_family] }}"
+wordpress_apache_binary: "{{ wordpress_apache_binary_map[ansible_os_family] }}"
+wordpress_apache_config_path: "{{ wordpress_apache_config_path_map[ansible_os_family] }}"
+

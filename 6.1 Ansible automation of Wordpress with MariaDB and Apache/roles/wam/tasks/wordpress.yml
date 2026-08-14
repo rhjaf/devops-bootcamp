@@ -1,0 +1,30 @@
+---
+
+- name: Download WordPress
+  ansible.builtin.get_url:
+    url: "{{ wordpress_download_url }}"
+    dest: "{{ wordpress_archive_path }}"
+    mode: "0644"
+
+- name: Extract WordPress into the web directory
+  ansible.builtin.unarchive:
+    src: "{{ wordpress_archive_path }}"
+    dest: "{{ wordpress_install_parent }}"
+    remote_src: true
+    creates: "{{ wordpress_install_dir }}/wp-settings.php"
+  
+- name: Generate the wp-config.php file
+  ansible.builtin.template:
+    src: wp-config.php.j2
+    dest: "{{ wordpress_install_dir }}/wp-config.php"
+    owner: "{{ wordpress_apache_user }}"
+    group: "{{ wordpress_apache_group }}"
+    mode: "0644"
+
+- name: Fix the permissions of the WordPress site
+  ansible.builtin.file:
+    path: "{{ wordpress_install_dir }}"
+    state: directory
+    owner: "{{ wordpress_apache_user }}"
+    group: "{{ wordpress_apache_group }}"
+    recurse: true

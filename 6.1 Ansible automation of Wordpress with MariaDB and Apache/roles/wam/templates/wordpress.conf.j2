@@ -1,0 +1,14 @@
+<VirtualHost *:{{ wordpress_apache_listen_port }}>
+    ServerName {{ wordpress_server_name }}
+    DocumentRoot {{ wordpress_install_dir }}
+
+    <Directory {{ wordpress_install_dir }}>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    DirectoryIndex index.php index.html
+    ErrorLog ${APACHE_LOG_DIR}/wordpress_error.log
+    CustomLog ${APACHE_LOG_DIR}/wordpress_access.log combined
+</VirtualHost>
+

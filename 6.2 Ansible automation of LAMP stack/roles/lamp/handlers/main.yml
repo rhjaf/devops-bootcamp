@@ -1,0 +1,19 @@
+---
+- name: restart apache on Debian
+  ansible.builtin.service:
+    name: "{{ apache_service }}"
+    state: restarted
+  listen: restart apache
+  when: ansible_os_family == "Debian"
+
+- name: restart apache on RedHat
+  ansible.builtin.shell: |
+    if pgrep -x httpd >/dev/null; then
+      pkill -x httpd
+      sleep 2
+    fi
+    nohup {{ apache_binary }} -DFOREGROUND > /tmp/httpd.log 2>&1 &
+  changed_when: true
+  listen: restart apache
+  when: ansible_os_family == "RedHat"
+
