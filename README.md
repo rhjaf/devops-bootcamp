@@ -103,6 +103,11 @@
   $(kubectl get pod -n kube-system -o name --field-selector spec.nodeName=mint | grep kube-proxy)
   ```
 # Usefull Kubernetes commands
+- Port forwarding a pod
+  ```bash
+  kubectl port-forward --address 0.0.0.0 svc/argocd-server -n argocd 8080:443
+  ```
+  Now the service is accesible through masternodeIP:8080.
 - Node selector
   ```bash
   kubectl label node n10 workload=monitoring
