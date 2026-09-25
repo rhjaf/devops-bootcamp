@@ -103,6 +103,11 @@
   $(kubectl get pod -n kube-system -o name --field-selector spec.nodeName=mint | grep kube-proxy)
   ```
 # Usefull Kubernetes commands
+-  Getting resoruces
+  ```bash
+  kubectl get crd
+  kubectl get app -n argocd
+  ```
 - Port forwarding a pod
   ```bash
   kubectl port-forward --address 0.0.0.0 svc/argocd-server -n argocd 8080:443
