@@ -41,7 +41,9 @@ sudo systemctl restart kubelet
 ```
 
 -- If you have problems with Calico pods refer to [this - day 54](https://github.com/CloudWithVarJosh/CKA-Certification-Course-2025/tree/main)
+
 -- Please note that if you have problem with Calico pods (especially **Felix** which is Calico's per-node agent), deleting the pod with `kubectl delete pod` could be a savior. 
+
 4. You can join any number of control-plane nodes by copying certificate authorities and service account keys on each node and then running the following as root:
 ```bash
 kubeadm join 192.168.1.10:6443 --token 8t6jwh.wopb1v2a0dlpoiu6 --discovery-token-ca-cert-hash sha256:d899d7ddd5001186c7b8d111c101efd91a9bccd15d16d0bcde3fa33829071a02 --control-plane
