@@ -73,6 +73,35 @@
   ```bash
   systemctl start kubelet
   ```
+- Problems with Calico:
+  ```bash
+  kubectl get installation.operator.tigera.io default -o yaml
+  kubectl patch installation.operator.tigera.io default --type=merge \
+  -p '{"spec":{"calicoNetwork":{"nodeAddressAutodetectionV4":{"kubernetes":"NodeInternalIP"}}}}'
+  kubectl patch installation.operator.tigera.io default --type=merge \
+  -p '{"spec":{"calicoNetwork":{"nodeAddressAutodetectionV4":{"interface":"ens33"}}}}'
+  ```
+  Now run `kubectl edit installation.operator.tigera.io default`   and remove  `"firstFound: true"` or replace it with `"kubernetes: NodeInternalIP"`.
+
+  Finally delete the pod
+  ```bash
+  kubectl delete pod -n calico-system -l k8s-app=calico-node
+  ```
+  After that to verify:
+  ```bash
+  ip -d link show vxlan.calico | grep -o 'local [0-9.]*'
+  ```
+  you may also need to restart all pods that are related to networking and use services. like argocd repo server or kube proxy:
+  ```bash
+  kubectl rollout restart deployment argocd-repo-server -n argocd
+  kubectl rollout restart deployment -n argocd argocd-server argocd-repo-server
+  kubectl rollout status deployment argocd-repo-server -n argocd
+  ```
+  for deleting kube proxy pods (they would be restraterted later):
+  ```bash
+  kubectl delete pod -n kube-system \
+  $(kubectl get pod -n kube-system -o name --field-selector spec.nodeName=mint | grep kube-proxy)
+  ```
 # Usefull Kubernetes commands
 - Node selector
   ```bash
@@ -124,4 +153,21 @@
   export NODE_PORT=$(kubectl get --namespace demo -o jsonpath="{.spec.ports[0].nodePort}" services podinfo)
   export NODE_IP=$(kubectl get nodes --namespace demo -o jsonpath="{.items[0].status.addresses[0].address}")
   echo http://$NODE_IP:$NODE_PORT
+  ```
+- Check connectivity for a pod on a specific node:
+  ```bash
+  kubectl run dns-debug --image=busybox:1.36 --restart=Never   --overrides='{"spec":{"nodeName":"mint"}}'   --command -- nslookup kubernetes.default.svc.cluster.local
+  kubectl run dns-test4 --image=busybox:1.36 --restart=Never   --overrides='{"spec":{"nodeName":"mint"}}'   --command -- nslookup gitlab.chabokan.net 8.8.8.8
+  kubectl logs dns-debug
+  ```
+  or interactive mode
+  ```bash
+  kubectl run dns-debug --image=busybox:1.36 --restart=Never   --overrides='{"spec":{"nodeName":"mint"}}'   -it --rm --   nslookup argocd-repo-server.argocd.svc.cluster.local
+  kubectl run dns-test4 --image=busybox:1.36 --restart=Never   --overrides='{"spec":{"nodeName":"mint"}}'   --command -- nslookup gitlab.chabokan.net 8.8.8.8
+
+  ```
+  if the pod has the tools:
+  ```bash
+  kubectl run net-test --image=busybox:1.36 --restart=Never -it --rm --   ping -c 3 10.20.185.28
+  kubectl run dns-test --image=busybox:1.36 --restart=Never -it --rm --   nslookup kubernetes.default.svc.cluster.local
   ```
